@@ -1,0 +1,37 @@
+import pubchempy as pcp
+import pandas as pd
+
+# Creating a list of 50,000 PubChem IDs
+id_list = range(1, 50001)
+
+# Initializing empty lists for the data
+cid_list = []
+name_list = []
+formula_list = []
+weight_list = []
+
+# Loop over the list of IDs and fetch the data
+for i in id_list:
+    try:
+        # Fetch the compound data by PubChem ID
+        compound = pcp.Compound.from_cid(i)
+
+        # Append the data to the lists
+        cid_list.append(compound.cid)
+        name_list.append(compound.iupac_name)
+        formula_list.append(compound.molecular_formula)
+        weight_list.append(compound.molecular_weight)
+
+        # Print a message to show the code is working for this entry
+        print(f"Fetched data for compound with CID {i}")
+
+    except:
+        # If there is an error, skip this compound and print an error message
+        print(f"Error fetching compound with CID {i}")
+
+# Create a Pandas DataFrame from the data
+data = {'CID': cid_list, 'Name': name_list, 'Formula': formula_list, 'Molecular Weight': weight_list}
+df = pd.DataFrame(data)
+
+# Save the DataFrame as an Excel spreadsheet
+df.to_excel('pubchem_50k_data.xlsx', index=False)
