@@ -1,0 +1,24 @@
+import numpy as np
+import pandas as pd
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
+
+# Load the data
+X = np.load('X.npy')
+y = np.load('y.npy')
+
+# Make X non-negative by taking absolute value
+X = np.abs(X)
+
+# Apply SelectKBest algorithm to select top k features
+k = 10 # Number of top features to select
+selector = SelectKBest(chi2, k=k)
+selector.fit(X, y)
+scores = selector.scores_
+
+# Save the scores in a CSV file
+df = pd.DataFrame({'Feature': range(len(scores)), 'Score': scores})
+df.to_csv('feature_univariate_scores.csv', index=False)
+
+# Print the scores of each feature in console
+print(df)
