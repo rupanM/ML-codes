@@ -1,0 +1,24 @@
+import pip
+from pubchempy import get_compounds
+# load and read Excel sheet
+
+import pandas as pd
+df = pd.read_excel("PubChemNames.xlsx")
+
+# Naming a new column to store the PUBChem IDs
+df["PUBChem IDs"] = ""
+
+# Iterating over the rows in the sheet
+for index, row in df.iterrows():
+    # Read the name of the molecule
+    name = row["Molecule Name"]
+    # Using pubchempy package to search for the molecule
+    compounds = get_compounds(name,'name')
+    if compounds:
+        # Storing the first compound's CID in the new column
+        df.at[index, 'PUBChem IDs'] = compounds[0].cid
+    else:
+        df.at[index, 'PUBChem IDs'] = 'Not Found'
+
+# Save the updated sheet to a new Excel file
+df.to_excel("PubChemCIDs.xlsx")
