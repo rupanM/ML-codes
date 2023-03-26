@@ -1,0 +1,21 @@
+import pandas as pd
+import random
+
+# read the Excel file and store the data in a pandas DataFrame
+df = pd.read_excel('50k_CIDs.xlsx')
+
+# create a list of all the non-blank IDs
+id_list = [id for id in df['ID'] if pd.notna(id)]
+
+# create 5 sets of 1200 random IDs each
+sets_of_ids = []
+for i in range(5):
+    random_ids = random.sample(id_list, 1200)
+    sets_of_ids.append(random_ids)
+
+# create a pandas DataFrame with the 5 sets of IDs
+df_sets_of_ids = pd.DataFrame(sets_of_ids).transpose()
+df_sets_of_ids.columns = [f'Set {i+1}' for i in range(5)]
+
+# save the DataFrame to a new Excel file
+df_sets_of_ids.to_excel('CID_sets.xlsx', index=False)
