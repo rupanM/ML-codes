@@ -1,0 +1,56 @@
+import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import Descriptors, Crippen, MolSurf, rdMolDescriptors, Lipinski, GraphDescriptors
+
+# read the input Excel file containing molecule names
+df = pd.read_excel('SMILES_List.xlsx')
+
+# create an empty list to store the results
+results = []
+
+# loop through each molecule name and fetch the corresponding molecule and its descriptors
+for index, row in df.iterrows():
+    molecule_name = row['SMILES']
+    try:
+        # fetch the molecule using the name
+        mol = Chem.MolFromSmiles(molecule_name)
+        # assumes molecule names are written in SMILES format in the Excel file
+        # calculate the descriptors
+        mw = Descriptors.MolWt(mol)
+        logp = Descriptors.MolLogP(mol)
+        tpsa = Descriptors.TPSA(mol)
+        hbd = Lipinski.NumHDonors(mol)
+        hba = Lipinski.NumHAcceptors(mol)
+        rot_bonds = Lipinski.NumRotatableBonds(mol)
+        rings = Descriptors.RingCount(mol)
+        aromatic_atoms = Descriptors.NumAromaticRings(mol)
+        aromatic_bonds = Descriptors.NumAromaticRings(mol)
+        heavy_atoms = Descriptors.HeavyAtomCount(mol)
+        sp3_carbons = Lipinski.FractionCSP3(mol)
+        chiral_centers = rdMolDescriptors.CalcNumSpiroAtoms(mol)
+        heteroatom_count = rdMolDescriptors.CalcNumHeteroatoms(mol)
+        charge = Chem.GetFormalCharge(mol)
+
+        # add the results to the list of dictionaries
+        results.append({'Molecule name': molecule_name, 'Molecular weight': mw, 'LogP': logp, 'TPSA': tpsa, 'HBD': hbd, 'HBA': hba,
+                         'Rotatable bonds': rot_bonds, 'Rings': rings, 'Aromatic atoms': aromatic_atoms,
+                         'Aromatic bonds': aromatic_bonds, 'Heavy atoms': heavy_atoms, 'Fraction of sp3 carbons': sp3_carbons,
+                         'Chiral centers': chiral_centers, 'Heteroatom count': heteroatom_count, 'Molecular charge': charge})
+
+        # print a message for successful entry
+        print(f'Successfully processed molecule: {molecule_name}')
+    except Exception as e:
+        # if there was an error, set the value as "NIL" and print an error message with the exception details
+        results.append({'Molecule name': molecule_name, 'Molecular weight': 'NIL', 'LogP': 'NIL', 'TPSA': 'NIL', 'HBD': 'NIL', 'HBA': 'NIL',
+                         'Rotatable bonds': 'NIL', 'Rings': 'NIL', 'Aromatic atoms': 'NIL',
+                         'Aromatic bonds': 'NIL', 'Heavy atoms': 'NIL', 'Fraction of sp3 carbons': 'NIL',
+                         'Chiral centers': 'NIL', 'Heteroatom count': 'NIL', 'Molecular charge': 'NIL'})
+        print(f'Error processing molecule: {molecule_name}')
+        print(e)
+
+
+# create a DataFrame from the list of dictionaries
+results_df = pd.DataFrame(results)
+
+# save the results to a CSV file
+results_df.to_csv('RDKit_14descriptors.csv', index=False)
