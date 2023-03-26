@@ -1,0 +1,27 @@
+import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import Descriptors
+from rdkit.ML.Descriptors import MoleculeDescriptors
+
+# Read the Excel file containing the molecules in SMILES format
+df = pd.read_excel('MOLECULES_IN_SMILE_FORMAT.xlsx')
+
+# Create a molecular descriptor calculator object for all available descriptors
+desc_names = [x[0] for x in Descriptors._descList]
+calc = MoleculeDescriptors.MolecularDescriptorCalculator(desc_names)
+
+# Calculate the descriptors for each molecule and store the results in a list of dictionaries
+results = []
+for i, row in df.iterrows():
+    smiles = row['SMILES']
+    mol = Chem.MolFromSmiles(smiles)
+    ds = calc.CalcDescriptors(mol)
+    result = {'SMILES': smiles}
+    for j, desc_name in enumerate(desc_names):
+        result[desc_name] = ds[j]
+    results.append(result)
+    print(f"Entry {i} processed successfully.")
+
+# Write the results to a CSV file
+output_df = pd.DataFrame(results)
+output_df.to_csv('Negative_file.csv', index=False)
